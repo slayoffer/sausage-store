@@ -1,0 +1,22 @@
+[Unit]
+Description=Sausage-store
+
+[Service]
+User=jarservice
+
+Environment=REPORT_PATH=/opt/log/reports
+Environment=LOG_PATH=/opt/log
+EnvironmentFile=/root/.db.cred
+
+StandardOutput=append:/opt/log/sausage-store-backend.log
+StandardError=append:/opt/log/sausage-store-backend.log
+
+ExecStart=/usr/bin/java -jar '/home/jarservice/sausage-store.jar'
+
+SuccessExitStatus=143
+
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

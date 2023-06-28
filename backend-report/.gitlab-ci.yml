@@ -1,0 +1,65 @@
+variables:
+  VERSION: 1.0.${CI_PIPELINE_ID}
+
+include:
+  - project: 'templates/ci'
+    file: 'DockerInDockerTemplate.yml'
+
+stages:
+  - build
+  - test
+  - release
+  - deploy
+
+build-backend-report:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.9.0-debug
+    entrypoint: [""]
+  script:
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}/backend-report"
+      --cache
+      --dockerfile "${CI_PROJECT_DIR}/backend-report/Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}/sausage-backend-report:${VERSION}"
+  rules:
+    - changes:
+      - backend-report/**/*
+
+test-backend-report:
+  stage: test
+  image: gitlab.praktikum-services.ru:5050/std-012-042/sausage-store/python:latest
+  script:
+    - cd backend-report
+    - pip install -r requirements.txt
+    - python3 -m unittest
+  rules:
+    - changes:
+      - backend-report/**/*
+
+upload-backend-report-latest:
+  variables:
+    GIT_STRATEGY: none
+  image: docker:20.10.12-dind-rootless
+  stage: release
+  before_script:
+    - until docker info; do sleep 1; done
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
+  script:
+    - docker pull $CI_REGISTRY_IMAGE/sausage-backend-report:$VERSION
+    # если образ прошел проверки в CI (сканирование, тесты и т.д), то тегаем latest.
+    - docker tag $CI_REGISTRY_IMAGE/sausage-backend-report:$VERSION $CI_REGISTRY_IMAGE/sausage-backend-report:latest
+    - docker push $CI_REGISTRY_IMAGE/sausage-backend-report:latest
+  rules:
+    - changes:
+      - backend-report/**/*
+
+deploy-backend-report:
+  stage: deploy
+  variables:
+    DOCKER_TAG: 1.0.$CI_PIPELINE_ID
+    SAUSAGE: backend-report
+  trigger:
+    project: std-012-042/infrastructure
+    branch: main
+    strategy: depend

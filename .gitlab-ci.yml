@@ -1,0 +1,44 @@
+stages:
+  - module-pipelines
+
+frontend:
+  stage: module-pipelines
+  trigger:
+    include:
+      - local: "/frontend/.gitlab-ci.yml"
+    strategy: depend # depend нужен, если какой-нибудь дочерний пайплайн свалился, мы знали, что общий пайплайн тоже идёт с ошибкой
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: $CI_COMMIT_TITLE =~ /draft/
+      when: never
+    - changes:      
+      - frontend/**/*
+
+backend:
+  stage: module-pipelines
+  trigger:
+    include:
+      - local: "/backend/.gitlab-ci.yml"
+    strategy: depend
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: $CI_COMMIT_TITLE =~ /draft/
+      when: never
+    - changes:
+      - backend/**/*
+
+backend-report:
+  stage: module-pipelines
+  trigger:
+    include:
+      - local: "/backend-report/.gitlab-ci.yml"
+    strategy: depend
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: $CI_COMMIT_TITLE =~ /draft/
+      when: never
+    - changes:
+      - backend-report/**/*

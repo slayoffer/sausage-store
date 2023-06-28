@@ -1,0 +1,44 @@
+{
+	"info": {
+		"_postman_id": "67b0e80a-7b2a-4484-bd90-1d34104183e1",
+		"name": "test backend",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25683019"
+	},
+	"item": [
+		{
+			"name": "backend avail test",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"the endpoint returns the expected status code\", () => {\r",
+							"    const expectedStatusCode = 200;\r",
+							"    pm.response.to.have.status(expectedStatusCode);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://backend:8080/api/products",
+					"protocol": "http",
+					"host": [
+						"backend"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"products"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

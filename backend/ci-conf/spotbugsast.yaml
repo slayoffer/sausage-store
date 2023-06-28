@@ -1,0 +1,12 @@
+spotbugs-sast:
+  cache:
+    key: backend-cache-${CI_COMMIT_REF_SLUG}
+    paths:
+      - ${CI_PROJECT_DIR}/backend/target
+    policy: pull
+  rules:
+    - changes:
+      - backend/**/*
+  variables:
+    COMPILE: "false"
+    SAST_JAVA_VERSION: 17

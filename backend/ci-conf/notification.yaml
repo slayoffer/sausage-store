@@ -1,0 +1,12 @@
+slack-notification-backend:
+  stage: notify
+  rules:
+  - if: $CI_COMMIT_TITLE =~ /send notification/
+    when: always
+  variables:
+    docker_link: "$CI_REGISTRY_IMAGE/sausage-backend:latest"
+    message: "Вышла новая версия backend-а сосисочной — ${VERSION}. Скачать docker образ можно по [ссылке](${docker_link})."
+  script:
+    - 'curl -X POST -H "Content-type: application/json" 
+      -d " { \"message\": \"${message}\" } " $pachka_bot'
+
